@@ -126,3 +126,7 @@ class UnusedVariable(Message):
     def __init__(self, filename, loc, names):
         Message.__init__(self, filename, loc)
         self.message_args = (names,)
+
+
+class BareExcept(Message):
+    message = 'bare except: do you realy want to handle all exceptions?'

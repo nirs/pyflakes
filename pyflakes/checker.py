@@ -843,8 +843,10 @@ class Checker(object):
     TRYEXCEPT = TRY
 
     def EXCEPTHANDLER(self, node):
-        # 3.x: in addition to handling children, we must handle the name of
-        # the exception, which is not a Name node, but a simple string.
-        if isinstance(node.name, str):
+        if node.type is None:
+            self.report(messages.BareExcept, node)
+        elif isinstance(node.name, str):
+            # 3.x: in addition to handling children, we must handle the name of
+            # the exception, which is not a Name node, but a simple string.
             self.handleNodeStore(node)
         self.handleChildren(node)

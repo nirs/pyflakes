@@ -192,7 +192,7 @@ class Test(TestCase):
         self.flakes('''
         try:
             def a(): pass
-        except:
+        except Exception:
             def a(): pass
         ''')
 
@@ -205,7 +205,7 @@ class Test(TestCase):
         try:
             def a(): pass
             def a(): pass
-        except:
+        except Exception:
             pass
         ''', m.RedefinedWhileUnused)
 
@@ -896,6 +896,17 @@ class TestUnusedAssignment(TestCase):
             try: pass
             except (tokenize.TokenError, IndentationError): pass
         ''')
+
+    def test_bareExcept(self):
+        """
+        Issue a warning when using bare except:.
+        """
+        self.flakes('''
+        try:
+            pass
+        except:
+            pass
+        ''', m.BareExcept)
 
     def test_augmentedAssignmentImportedFunctionCall(self):
         """

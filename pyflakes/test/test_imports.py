@@ -61,7 +61,7 @@ class Test(TestCase):
         try:
             import os
             import os
-        except:
+        except Exception:
             pass
         os.path''', m.RedefinedWhileUnused)
 
@@ -73,7 +73,7 @@ class Test(TestCase):
         self.flakes('''
         try:
             import os
-        except:
+        except Exception:
             import os
         os.path''')
 
@@ -87,7 +87,7 @@ class Test(TestCase):
             if True:
                 if True:
                     import os
-        except:
+        except Exception:
             import os
         os.path''')
 
@@ -99,7 +99,7 @@ class Test(TestCase):
             from bb import mixer
         except RuntimeError:
             from cc import mixer
-        except:
+        except Exception:
             from dd import mixer
         mixer(123)
         """)
@@ -376,14 +376,14 @@ class Test(TestCase):
         self.flakes('''
         import fu
         try: fu
-        except: pass
+        except Exception: pass
         ''')
 
     def test_usedInExcept(self):
         self.flakes('''
         import fu
         try: fu
-        except: pass
+        except Exception: pass
         ''')
 
     def test_redefinedByExcept(self):

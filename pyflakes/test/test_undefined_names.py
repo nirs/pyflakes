@@ -352,7 +352,7 @@ class Test(TestCase):
         self.flakes('''
         try:
             socket_map
-        except:
+        except Exception:
             socket_map = {}
         ''', m.UndefinedName)
         self.flakes('''
