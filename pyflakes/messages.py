@@ -6,6 +6,7 @@ Provide the class Message and its subclasses.
 class Message(object):
     message = ''
     message_args = ()
+    pedantic = False
 
     def __init__(self, filename, loc):
         self.filename = filename
@@ -130,3 +131,4 @@ class UnusedVariable(Message):
 
 class BareExcept(Message):
     message = 'bare except: do you realy want to handle all exceptions?'
+    pedantic = True

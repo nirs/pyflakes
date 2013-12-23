@@ -14,7 +14,7 @@ from pyflakes import reporter as modReporter
 __all__ = ['check', 'checkPath', 'checkRecursive', 'iterSourceCode', 'main']
 
 
-def check(codeString, filename, reporter=None):
+def check(codeString, filename, options, reporter=None):
     """
     Check the Python source given by C{codeString} for flakes.
 
@@ -24,6 +24,8 @@ def check(codeString, filename, reporter=None):
     @param filename: The name of the file the source came from, used to report
         errors.
     @type filename: C{str}
+
+    @param options: A L{optparse.Values} instance, with application options
 
     @param reporter: A L{Reporter} instance, where errors and warnings will be
         reported.
@@ -56,15 +58,20 @@ def check(codeString, filename, reporter=None):
         return 1
     # Okay, it's syntactically valid.  Now check it.
     w = checker.Checker(tree, filename)
+    if not options.pedantic:
+        w.messages = [warning for warning in w.messages
+                      if not warning.pedantic]
     w.messages.sort(key=lambda m: m.lineno)
     for warning in w.messages:
         reporter.flake(warning)
     return len(w.messages)
 
 
-def checkPath(filename, reporter=None):
+def checkPath(filename, options, reporter=None):
     """
     Check the given path, printing out any warnings detected.
+
+    @param options: A L{optparse.Values} instance, with application options
 
     @param reporter: A L{Reporter} instance, where errors and warnings will be
         reported.
@@ -83,7 +90,7 @@ def checkPath(filename, reporter=None):
         msg = sys.exc_info()[1]
         reporter.unexpectedError(filename, msg.args[1])
         return 1
-    return check(codestr, filename, reporter)
+    return check(codestr, filename, options, reporter)
 
 
 def iterSourceCode(paths):
@@ -104,28 +111,32 @@ def iterSourceCode(paths):
             yield path
 
 
-def checkRecursive(paths, reporter):
+def checkRecursive(paths, options, reporter):
     """
     Recursively check all source files in C{paths}.
 
     @param paths: A list of paths to Python source files and directories
         containing Python source files.
+    @param options: A L{optparse.Values} instance, with application options
     @param reporter: A L{Reporter} where all of the warnings and errors
         will be reported to.
     @return: The number of warnings found.
     """
     warnings = 0
     for sourcePath in iterSourceCode(paths):
-        warnings += checkPath(sourcePath, reporter)
+        warnings += checkPath(sourcePath, options, reporter)
     return warnings
 
 
 def main(prog=None):
     parser = OptionParser(prog=prog, version=__version__)
-    __, args = parser.parse_args()
+    parser.add_option('-p', '--pedantic', dest='pedantic', action='store_true',
+                      help='enable pedantic warnings')
+    parser.set_defaults(pedantic=False)
+    options, args = parser.parse_args()
     reporter = modReporter._makeDefaultReporter()
     if args:
-        warnings = checkRecursive(args, reporter)
+        warnings = checkRecursive(args, options, reporter)
     else:
-        warnings = check(sys.stdin.read(), '<stdin>', reporter)
+        warnings = check(sys.stdin.read(), '<stdin>', options, reporter)
     raise SystemExit(warnings > 0)
